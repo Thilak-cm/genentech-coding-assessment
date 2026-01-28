@@ -12,6 +12,7 @@
 #' calc_median(c(5)) # Median is 5 (single value)
 #' calc_median(numeric(0)) # Error: Input vector must not be empty.
 #' calc_median(c(NA, NA, NA)) # Error: Input vector contains only missing values.
+#' @importFrom stats median quantile
 #' @export
 calc_median <- function(x) {
   if (length(x) == 0) {

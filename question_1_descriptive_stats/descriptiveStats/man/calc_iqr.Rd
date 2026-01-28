@@ -17,10 +17,10 @@ Calculates the Interquartile Range (IQR = Q3 - Q1) of a numeric vector.
 Missing values are removed by default.
 }
 \examples{
-calc_iqr(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) # IQR is 4.5
-calc_iqr(c(1, 2, 2, 3, 4, 5, 5, 5, 6, 10)) # IQR is 3
-calc_iqr(c(1, NA, 3, 4, 5)) # IQR is 2.5
-calc_iqr(c(5)) # IQR is 0 (single value)
-calc_iqr(numeric(0)) # Error: Input vector must not be empty.
+calc_iqr(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) # 4.5
+calc_iqr(c(1, 2, 2, 3, 4, 5, 5, 5, 6, 10)) # 2.75
+calc_iqr(c(1, NA, 3, 4, 5))               # 1.75
+calc_iqr(c(5))                            # 0
+try(calc_iqr(numeric(0)))
 calc_iqr(c(NA, NA, NA)) # Error: Input vector contains only missing values.
 }
