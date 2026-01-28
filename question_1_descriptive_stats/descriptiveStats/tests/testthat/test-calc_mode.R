@@ -30,8 +30,9 @@ test_that("calc_mode handles edge cases and errors", {
   # Empty vector
   expect_error(calc_mode(numeric(0)), "Input vector must not be empty")
   
-  # All NA values
-  expect_error(calc_mode(c(NA, NA, NA)), "Input vector contains only missing values")
+  # All NA values (numeric)
+  expect_error(calc_mode(rep(NA_real_, 3)), "Input vector contains only missing values")
+  expect_error(calc_mode(as.numeric(c(NA, NA, NA))), "Input vector contains only missing values")
   
   # Non-numeric input
   expect_error(calc_mode(c("a", "b", "c")), "Input must be a numeric vector")

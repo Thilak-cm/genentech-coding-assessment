@@ -18,16 +18,17 @@ test_that("calc_median calculates median correctly", {
 test_that("calc_median handles NA values correctly", {
   # NA values are removed
   expect_equal(calc_median(c(1, NA, 3, 4, 5)), 3.5)
-  expect_equal(calc_median(c(1, 2, NA, 4)), 2.5)
-  expect_equal(calc_median(c(NA, 2, 3, NA)), 2.5)
+  expect_equal(calc_median(c(1, 2, NA, 4)), 2)  # After removing NA: [1, 2, 4], median = 2
+  expect_equal(calc_median(c(NA, 2, 3, NA)), 2.5)  # After removing NA: [2, 3], median = 2.5
 })
 
 test_that("calc_median handles edge cases and errors", {
   # Empty vector
   expect_error(calc_median(numeric(0)), "Input vector must not be empty")
   
-  # All NA values
-  expect_error(calc_median(c(NA, NA, NA)), "Input vector contains only missing values")
+  # All NA values (numeric)
+  expect_error(calc_median(rep(NA_real_, 3)), "Input vector contains only missing values")
+  expect_error(calc_median(as.numeric(c(NA, NA, NA))), "Input vector contains only missing values")
   
   # Non-numeric input
   expect_error(calc_median(c("a", "b", "c")), "Input must be a numeric vector")

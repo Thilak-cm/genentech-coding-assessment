@@ -14,12 +14,12 @@
 #' calc_q1(c(NA, NA, NA)) # Error: Input vector contains only missing values.
 #' @export
 calc_q1 <- function(x) {
-  if (!is.numeric(x)) {
-    stop("Input must be a numeric vector.")
-  }
-  
   if (length(x) == 0) {
     stop("Input vector must not be empty.")
+  }
+  
+  if (!is.numeric(x)) {
+    stop("Input must be a numeric vector.")
   }
   
   # Remove missing values
