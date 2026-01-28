@@ -1,7 +1,8 @@
 test_that("calc_q3 calculates third quartile correctly", {
   # Standard cases
   expect_equal(calc_q3(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)), 7.75)
-  expect_equal(calc_q3(c(1, 2, 2, 3, 4, 5, 5, 5, 6, 10)), 5.75)
+  # Q3 for [1, 2, 2, 3, 4, 5, 5, 5, 6, 10] = 5 (using R's default quantile type 7)
+  expect_equal(calc_q3(c(1, 2, 2, 3, 4, 5, 5, 5, 6, 10)), 5)
   
   # Single value
   expect_equal(calc_q3(c(5)), 5)
