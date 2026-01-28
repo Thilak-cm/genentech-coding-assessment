@@ -24,6 +24,8 @@ calc_mode(c(1, 2, 3, 4, 5))  # Returns NA (no mode)
 calc_mode(c(1, 2, 2, 3, 3))  # Returns 2 (first mode in case of tie)
 calc_mode(c(1, NA, 2, 2, 3))  # Returns 2. NA is dropped
 calc_mode(c(5))  # Returns NA (single value, no mode)
+\dontrun{
 calc_mode(numeric(0)) # Error: Input vector must not be empty.
 calc_mode(c(NA, NA, NA)) # Error: Input vector contains only missing values.
+}
 }

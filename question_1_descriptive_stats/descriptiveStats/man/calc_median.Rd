@@ -21,6 +21,8 @@ calc_median(c(1, 2, 3, 4, 5)) # Median is 3
 calc_median(c(1, 2, 3, 4)) # Median is 2.5, ie, the average of middle two numbers, 2 and 3.
 calc_median(c(1, NA, 3, 4, 5)) # Median is 3.5. NA is dropped
 calc_median(c(5)) # Median is 5 (single value)
+\dontrun{
 calc_median(numeric(0)) # Error: Input vector must not be empty.
 calc_median(c(NA, NA, NA)) # Error: Input vector contains only missing values.
+}
 }

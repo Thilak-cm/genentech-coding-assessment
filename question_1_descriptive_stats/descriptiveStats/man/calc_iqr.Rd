@@ -21,6 +21,8 @@ calc_iqr(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) # 4.5
 calc_iqr(c(1, 2, 2, 3, 4, 5, 5, 5, 6, 10)) # 2.75
 calc_iqr(c(1, NA, 3, 4, 5))               # 1.75
 calc_iqr(c(5))                            # 0
-try(calc_iqr(numeric(0)))
-calc_iqr(c(NA, NA, NA)) # Error: Input vector contains only missing values.
+\dontrun{
+try(calc_iqr(numeric(0)), silent = TRUE)
+try(calc_iqr(c(NA, NA, NA)), silent = TRUE)
+}
 }
