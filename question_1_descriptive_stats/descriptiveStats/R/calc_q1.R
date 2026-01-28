@@ -10,7 +10,7 @@
 #' calc_q1(c(1, 2, 2, 3, 4, 5, 5, 5, 6, 10)) # Q1 is 2.25
 #' calc_q1(c(1, NA, 3, 4, 5)) # Q1 is 2.5
 #' calc_q1(c(5)) # Q1 is 5 (single value)
-#' \donttest{
+#' \dontrun{
 #' calc_q1(numeric(0)) # Error: Input vector must not be empty.
 #' calc_q1(c(NA, NA, NA)) # Error: Input vector contains only missing values.
 #' }
