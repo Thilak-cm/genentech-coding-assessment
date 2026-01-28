@@ -9,8 +9,10 @@
 #' calc_mean(c(1, 2, 3)) # Mean is 2
 #' calc_mean(c(1, NA, 3)) # Mean is 2. NA is dropped here
 #' calc_mean(c(5)) # Mean is 5 (single value)
+#' \donttest{
 #' calc_mean(numeric(0)) # Error: Input vector must not be empty.
 #' calc_mean(c(NA, NA, NA)) # Error: Input vector contains only missing values.
+#' }
 #' @export
 calc_mean <- function(x) {
   if (length(x) == 0) {

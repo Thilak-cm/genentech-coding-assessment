@@ -10,8 +10,10 @@
 #' calc_iqr(c(1, 2, 2, 3, 4, 5, 5, 5, 6, 10)) # 2.75
 #' calc_iqr(c(1, NA, 3, 4, 5))               # 1.75
 #' calc_iqr(c(5))                            # 0
+#' \donttest{
 #' try(calc_iqr(numeric(0)), silent = TRUE)
 #' try(calc_iqr(c(NA, NA, NA)), silent = TRUE)
+#' }
 #' @export
 calc_iqr <- function(x) {
   if (length(x) == 0) {
