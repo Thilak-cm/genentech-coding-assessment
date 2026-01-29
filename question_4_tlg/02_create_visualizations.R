@@ -40,9 +40,7 @@ ggsave(
   dpi = 300
 )
 
-denom <- adsl %>%
-  distinct(USUBJID) %>%
-  nrow()
+denom <- adae_te %>% distinct(USUBJID) %>% nrow()
 
 top10_ae <- adae_te %>%
   distinct(USUBJID, AETERM) %>%
@@ -50,26 +48,30 @@ top10_ae <- adae_te %>%
   arrange(desc(n)) %>%
   slice_head(n = 10) %>%
   mutate(
-    ci = binom.confint(n, denom, methods = "wilson"),
+    ci = binom.confint(n, denom, methods = "exact"),
     pct = 100 * n / denom,
     lower = 100 * ci$lower,
     upper = 100 * ci$upper
   )
 
 p_top10 <- top10_ae %>%
-  ggplot(aes(x = reorder(AETERM, pct), y = pct)) +
-  geom_col(fill = "steelblue") +
-  geom_errorbar(
-    aes(ymin = lower, ymax = upper),
-    width = 0.2
+  ggplot(aes(x = pct, y = reorder(AETERM, pct))) +
+  geom_point(size = 2) +
+  geom_errorbarh(
+    aes(xmin = lower, xmax = upper),
+    height = 0.2
   ) +
-  coord_flip() +
   labs(
     title = "Top 10 Most Frequent Adverse Events",
-    x = "Adverse Event",
-    y = "Incidence (%)"
+    subtitle = paste0(
+      "n = ", denom,
+      " subjects; 95% Clopper-Pearson CIs"
+    ),
+    x = "Percentage of Patients (%)",
+    y = "Adverse Event"
   ) +
   theme_minimal()
+
 
 ggsave(
   filename = "top10_ae_incidence.png",
