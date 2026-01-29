@@ -6,14 +6,12 @@
 # ------------------------------------------------------------------------------
 
 library(dplyr)
-library(gtsummary)
 library(gt)
-
 library(pharmaverseadam)
 
 data("adae", package = "pharmaverseadam")
 
-# Filter to treatment-emergent AEs and select required variables
+# Create AE listing data
 ae_listing <- adae %>%
   filter(TRTEMFL == "Y") %>%
   select(
@@ -28,16 +26,28 @@ ae_listing <- adae %>%
   arrange(USUBJID, AESTDTC)
 
 # Create listing table
-ae_listing_tbl <- ae_listing %>%
-  tbl_summary(
-    by = USUBJID,
-    statistic = all_categorical() ~ "{level}",
-    missing = "no"
+ae_listing_gt <- ae_listing %>%
+  gt(groupname_col = "USUBJID") %>%
+  tab_header(
+    title = "Listing of Treatment-Emergent Adverse Events",
+    subtitle = "Sorted by Subject and Event Start Date"
   ) %>%
-  modify_header(label = "**Adverse Event Listing**") %>%
-  bold_labels()
+  cols_label(
+    USUBJID = "Subject ID",
+    ACTARM  = "Treatment",
+    AETERM  = "Adverse Event",
+    AESEV   = "Severity",
+    AEREL   = "Relationship",
+    AESTDTC = "Start Date",
+    AEENDTC = "End Date"
+  ) %>%
+  cols_hide(USUBJID) %>%   # hide repeated subject column
+  opt_all_caps() %>%
+  tab_options(
+    row_group.font.weight = "bold",
+    table.font.size = px(12)
+  )
+
 
 # Export to HTML
-ae_listing_tbl %>%
-  as_gt() %>%
-  gtsave("ae_listings.html")
+gtsave(ae_listing_gt, "ae_listings.html")
