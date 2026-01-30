@@ -25,8 +25,28 @@ class FilterCondition(BaseModel):
 
 
 class LLMFilterResult(BaseModel):
-    filters: List[FilterCondition] = Field(
-        default_factory=list, description="List of filter conditions"
+    target_column: str = Field(
+        ...,
+        description=(
+            "Primary dataset column to filter (e.g., AESEV for severity/intensity, "
+            "AETERM for condition/term, AESOC for body system)."
+        ),
+    )
+    filter_value: str = Field(
+        ...,
+        description=(
+            "Primary value to search for in target_column, extracted from the question "
+            "(e.g., MODERATE, HEADACHE, CARDIAC)."
+        ),
+    )
+    target_operator: Literal["equals", "contains"] = Field(
+        "equals", description="How to apply the primary filter"
+    )
+    additional_filters: List[FilterCondition] = Field(
+        default_factory=list,
+        description=(
+            "Optional additional filter conditions (e.g., TRTEMFL == 'Y', AEREL != 'NONE')."
+        ),
     )
     needs_clarification: bool = Field(
         False, description="True if the question is ambiguous or missing details"
@@ -71,7 +91,8 @@ class ClinicalTrialDataAgent:
                     "most appropriate column and value from the schema. "
                     "If the question is ambiguous or missing details, set "
                     "needs_clarification=true and provide a short "
-                    "clarification_question. Return only JSON that matches the schema.",
+                    "clarification_question. Return only JSON that matches the schema. "
+                    "Your JSON MUST include: target_column and filter_value.",
                 ),
                 (
                     "user",
@@ -90,35 +111,39 @@ class ClinicalTrialDataAgent:
 
     def _mock_llm_response(self, question: str) -> str:
         text = question.lower()
-        filters: List[dict] = []
+        target_column = ""
+        filter_value = ""
+        target_operator: str = "equals"
+        additional_filters: List[dict] = []
 
         if "severe" in text:
-            filters.append(
-                {"column": "AESEV", "operator": "equals", "value": "SEVERE"}
-            )
+            target_column, filter_value, target_operator = "AESEV", "SEVERE", "equals"
         if "moderate" in text:
-            filters.append(
-                {"column": "AESEV", "operator": "equals", "value": "MODERATE"}
-            )
+            target_column, filter_value, target_operator = "AESEV", "MODERATE", "equals"
         if "mild" in text:
-            filters.append({"column": "AESEV", "operator": "equals", "value": "MILD"})
+            target_column, filter_value, target_operator = "AESEV", "MILD", "equals"
         if "headache" in text:
-            filters.append(
-                {"column": "AETERM", "operator": "equals", "value": "HEADACHE"}
-            )
+            target_column, filter_value, target_operator = "AETERM", "HEADACHE", "equals"
         if "cardiac" in text:
-            filters.append(
-                {"column": "AESOC", "operator": "contains", "value": "CARDIAC"}
-            )
+            target_column, filter_value, target_operator = "AESOC", "CARDIAC", "contains"
         if "treatment-emergent" in text or "teae" in text:
-            filters.append({"column": "TRTEMFL", "operator": "equals", "value": "Y"})
+            additional_filters.append(
+                {"column": "TRTEMFL", "operator": "equals", "value": "Y"}
+            )
         if "related to drug" in text or "drug-related" in text:
-            filters.append({"column": "AEREL", "operator": "not_null", "value": ""})
-            filters.append({"column": "AEREL", "operator": "not_equals", "value": "NONE"})
+            additional_filters.append(
+                {"column": "AEREL", "operator": "not_null", "value": ""}
+            )
+            additional_filters.append(
+                {"column": "AEREL", "operator": "not_equals", "value": "NONE"}
+            )
 
-        if len(text.split()) < 3 or not filters:
+        if len(text.split()) < 3 or not target_column or not filter_value:
             result = {
-                "filters": [],
+                "target_column": "",
+                "filter_value": "",
+                "target_operator": "equals",
+                "additional_filters": [],
                 "needs_clarification": True,
                 "clarification_question": (
                     "Can you clarify what you want to filter by "
@@ -128,7 +153,10 @@ class ClinicalTrialDataAgent:
             }
         else:
             result = {
-                "filters": filters,
+                "target_column": target_column,
+                "filter_value": filter_value,
+                "target_operator": target_operator,
+                "additional_filters": additional_filters,
                 "needs_clarification": False,
                 "clarification_question": "",
             }
@@ -151,14 +179,23 @@ class ClinicalTrialDataAgent:
 
     def execute(self, question: str) -> QueryResult | ClarificationResult:
         parsed = self.parse_question(question)
-        if parsed.needs_clarification or not parsed.filters:
+        if parsed.needs_clarification or not parsed.target_column or not parsed.filter_value:
             return ClarificationResult(
                 clarification_question=parsed.clarification_question
                 or "Could you clarify your question?"
             )
+
+        filters: List[FilterCondition] = [
+            FilterCondition(
+                column=parsed.target_column,
+                operator=parsed.target_operator,
+                value=parsed.filter_value,
+            )
+        ] + list(parsed.additional_filters)
+
         mask = pd.Series([True] * len(self.df))
 
-        for condition in parsed.filters:
+        for condition in filters:
             if condition.column not in self.df.columns:
                 raise ValueError(f"Unknown column: {condition.column}")
 
@@ -188,7 +225,7 @@ class ClinicalTrialDataAgent:
         usubjids = sorted(filtered["USUBJID"].dropna().unique().tolist())
 
         return QueryResult(
-            filters=parsed.filters,
+            filters=filters,
             count=len(usubjids),
             usubjids=usubjids,
         )
